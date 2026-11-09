@@ -1,0 +1,41 @@
+Ejemplos de «Apache Flink: transformaciones, estado y flujos conectados»
+Flink 1.9.0 · Scala 2.11 · Java 8
+
+Cada ejemplo es un proyecto Maven independiente y autocontenido
+(paquete es.uclm.iot.transformaciones.eNN):
+
+  E01_Map/                     map
+  E02_FlatMap/                 flatMap
+  E03_Filter/                  filter
+  E04_KeyByReduce/             keyBy + reduce
+  E05_Agregaciones/            max, maxBy, sum
+  E06_RichMap/                 RichMapFunction + ValueState
+  E07_RichFlatMap/             RichFlatMapFunction + ValueState
+  E08_ListMapState/            ListState y MapState
+  E09_ProcessSalidaLateral/    KeyedProcessFunction + salidas laterales
+  E10_ConnectUmbrales/         connect + RichCoFlatMapFunction
+  E11_Enriquecer/              connect + KeyedCoProcessFunction
+  E12_Emparejar/               emparejar con temporizadores (argumento: orden | temporizador)
+  E13_UmbralesDinamicos/       ejemplo final para el clúster (sockets 9999 y 9998)
+
+Cada proyecto contiene:
+  pom.xml                      con su propia clase principal
+  src/main/scala/...           el código (E10, E11 y E12 incluyen su copia de FuenteConPausas)
+  src/main/resources/          log4j.properties
+
+E01..E12: abrir el proyecto en el IDE y ejecutar el main.
+Compilar cualquiera: cd <proyecto> && mvn clean package -> target/<artifactId>-1.0.jar
+
+flink-docker/       docker-compose del clúster y jobs/ con el jar de EXX ya compilado a ejecutar
+  Para compilar y ejecutar el ejemplo E13_UmbralesDinamicos:
+      Compilar E13: cd E13_UmbralesDinamicos && mvn clean package
+                    cp target/e13-umbrales-dinamicos-1.0.jar ../flink-docker/jobs/
+
+      Terminal 1: nc -lk 9999        (lecturas: s1,31.5)
+      Terminal 2: nc -lk 9998        (umbrales: s1,35)
+      Terminal 3: cd ../flink-docker
+                  docker-compose up -d
+                  docker exec jobmanager flink run -d /jobs/e13-umbrales-dinamicos-1.0.jar host.docker.internal 9999 9998 30
+                  docker logs -f taskmanager
+                  docker exec jobmanager flink cancel <JobID>
+

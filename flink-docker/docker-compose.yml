@@ -1,0 +1,24 @@
+version: "2.2"
+services:
+  jobmanager:
+    image: flink:1.9.0-scala_2.11
+    container_name: jobmanager
+    command: jobmanager
+    ports:
+      - "8081:8081"              # interfaz Web y API REST
+    environment:
+      - JOB_MANAGER_RPC_ADDRESS=jobmanager
+    volumes:
+      - ./jobs:/jobs             # carpeta compartida para los .jar
+
+  taskmanager:
+    image: flink:1.9.0-scala_2.11
+    container_name: taskmanager
+    command: taskmanager
+    depends_on:
+      - jobmanager
+    environment:
+      - JOB_MANAGER_RPC_ADDRESS=jobmanager
+      - TASK_MANAGER_NUMBER_OF_TASK_SLOTS=2
+    extra_hosts:
+      - "host.docker.internal:host-gateway"   # para llegar al nc del anfitrion (Linux)

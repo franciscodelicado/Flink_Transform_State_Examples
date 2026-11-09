@@ -1,0 +1,10 @@
+# Metals y VS Code (en cualquier proyecto)
+.metals/
+.vscode/
+
+# Salida de compilación de Maven (en cualquier proyecto)
+target/
+
+# Jars que se copian al clúster
+flink-docker/jobs/*
+!flink-docker/jobs/.gitkeep
